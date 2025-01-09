@@ -1,11 +1,9 @@
 show databases ;
-create table if not exists gmall_Insurance;
-use gmall_Insurance;
 
 
 --开启spark-sql客户端，将下面的代码粘贴到spark-sql中运行。
 drop database if exists insurance_ods cascade;
-create database insurance_ods;
+create database insurance_ods location "/spark-hive/tables/";
 use insurance_ods;
 
 drop  table if exists mort_10_13;
@@ -18,9 +16,10 @@ create table mort_10_13(
                            cl5  decimal(10, 8) comment '养老类业务表，男（CL5）',
                            cl6  decimal(10, 8) comment '养老类业务表，女（CL6）'
 ) comment '中国人身保险业经验生命表（2010－2013）'
-    row format delimited fields terminated by '\t';
-load data local inpath '/export/data/workspace/insurance_test/5_hive_data/mort_10_13.txt' overwrite into table mort_10_13;
-
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/mort_10_13";
+-- load data   inpath  '/export/data/workspace/insurance_test/5_hive_data/mort_10_13.txt' overwrite into table mort_10_13;
+load data  inpath  '/export/data/workspace/insurance_test/5_hive_data/mort_10_13.txt' into table mort_10_13;
+select * from mort_10_13;
 drop table if exists dd_table;
 create table dd_table(
                          age      smallint comment '年龄',
@@ -29,8 +28,8 @@ create table dd_table(
                          k_male   decimal(10, 8) comment '男性的K值',
                          k_female decimal(10, 8) comment '女性的K值'
 ) comment '行业25种重疾发生率'
-    row format delimited fields terminated by '\t';
-load data local inpath '/export/data/workspace/insurance_test/5_hive_data/dd_table.txt' overwrite into table dd_table;
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/dd_table";
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/dd_table.txt' overwrite into table dd_table;
 
 
 --ASSUMPTION 预定附加费用率 pre_add_exp_ratio
@@ -46,8 +45,8 @@ create table pre_add_exp_ratio  (
                                     r_avg decimal(10,8) comment 'Avg',
                                     r_max decimal(10,8) comment '上限'
 ) comment '预定附加费用率'
-    row format delimited fields terminated by '\t';
-load data local inpath '/export/data/workspace/insurance_test/5_hive_data/pre_add_exp_ratio.txt' overwrite into table pre_add_exp_ratio;
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/pre_add_exp_ratio";
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/pre_add_exp_ratio.txt' overwrite into table pre_add_exp_ratio;
 
 
 drop table if exists prem_std_real;
@@ -59,8 +58,8 @@ create table prem_std_real
     bpp     string comment '保障期',
     prem    decimal(14, 6) comment '每期交的保费',
     nbev    decimal(10,8) comment '新业务价值率（NBEV，New Business Embed Value）'
-)comment '标准保费真实参照表' row format delimited fields terminated by '\t';
-load data local inpath '/export/data/workspace/insurance_test/5_hive_data/prem_std_real.txt' overwrite into table prem_std_real;
+)comment '标准保费真实参照表' row format delimited fields terminated by '\t' location "/spark-hive/insurance/prem_std_real";
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/prem_std_real.txt' overwrite into table prem_std_real;
 
 drop table if exists prem_cv_real;
 create table prem_cv_real
@@ -70,8 +69,8 @@ create table prem_cv_real
     ppp     smallint comment '缴费期间',
     prem_cv      decimal(15, 7) comment '保单价值准备金毛保险费(Preuim)'
 )comment '保单价值准备金毛保险费，真实参照表'
-    row format delimited fields terminated by '\t';
-load data local inpath '/export/data/workspace/insurance_test/5_hive_data/prem_cv_real.txt' overwrite into table prem_cv_real;
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/prem_cv_real";
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/prem_cv_real.txt' overwrite into table prem_cv_real;
 
 drop table if exists area;
 create table area
@@ -80,8 +79,8 @@ create table area
     province  string comment '省份',
     city      string comment '城市',
     direction String comment '大区域'
-) comment '中国省市区域表' row format delimited fields terminated by '\t';
-load data local inpath '/export/data/workspace/insurance_test/5_hive_data/area.txt' overwrite into table area;
+) comment '中国省市区域表' row format delimited fields terminated by '\t' location "/spark-hive/insurance/area";
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/area.txt' overwrite into table area;
 
 
 drop table if exists policy_client;
@@ -97,8 +96,8 @@ CREATE TABLE policy_client(
                               direction STRING COMMENT '区域',
                               income INT COMMENT '收入'
 )
-    comment '客户信息表' row format delimited fields terminated by '\t';
-load data local inpath '/export/data/workspace/insurance_test/5_hive_data/policy_client.txt' overwrite into table policy_client;
+    comment '客户信息表' row format delimited fields terminated by '\t' location "/spark-hive/insurance/policy_client";
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/policy_client.txt' overwrite into table policy_client;
 
 
 drop table if exists policy_benefit;
@@ -111,8 +110,8 @@ CREATE TABLE policy_benefit(  pol_no STRING COMMENT '保单号',
                               insur_code STRING COMMENT '保险代码',
                               pol_flag smallint COMMENT '保单状态，1有效，0失效',
                               elapse_date STRING COMMENT '保单失效时间')
-    comment '客户投保详情表' row format delimited fields terminated by '\t';
-load data local inpath '/export/data/workspace/insurance_test/5_hive_data/policy_benefit.txt' overwrite into table policy_benefit;
+    comment '客户投保详情表' row format delimited fields terminated by '\t' location "/spark-hive/insurance/policy_benefit";
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/policy_benefit.txt' overwrite into table policy_benefit;
 
 drop table if exists claim_info;
 create table claim_info
@@ -125,8 +124,8 @@ create table claim_info
     claim_item string comment '理赔责任',
     claim_mnt decimal(35,6) comment '理赔金额'
 )  comment '理赔信息表'
-    row format delimited fields terminated by '\t';
-load data local inpath '/export/data/workspace/insurance_test/5_hive_data/claim_info.txt' overwrite into table claim_info;
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/claim_info";
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/claim_info.txt' overwrite into table claim_info;
 
 drop table if exists policy_surrender;
 create table  policy_surrender
@@ -137,13 +136,13 @@ create table  policy_surrender
     keep_days smallint comment '退保前的保单持有天数',
     elapse_date string comment '保单失效日期'
 ) comment '退保记录表'
-    row format delimited fields terminated by '\t';
-load data local inpath '/export/data/workspace/insurance_test/5_hive_data/policy_surrender.txt' overwrite into table policy_surrender;
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/policy_surrender";
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/policy_surrender.txt' overwrite into table policy_surrender;
 
 
 
 drop database  if exists insurance_dw cascade ;
-create database insurance_dw;
+create database if not exists insurance_dw location "/spark-hive/tables/";
 use insurance_dw;
 
 drop table if exists prem_src;
@@ -183,8 +182,12 @@ create table prem_src
     db4           decimal(5, 2) comment '身故给付保险金',
     db5           decimal(17, 12) comment '豁免保费因子'
 ) comment '保费因子表（到每个保单年度）'
-    row format delimited fields terminated by '\t';
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/prem_src";
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/prem_src.txt' overwrite into table prem_src;
 
+
+select * from prem_std;
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/prem_std_real.txt' overwrite into table prem_std;
 drop table if exists prem_std;
 create table prem_std
 (
@@ -194,7 +197,8 @@ create table prem_std
     bpp     string comment '保障期',
     prem    decimal(14, 6) comment '每期交的保费'
 ) comment '标准保费结果表' row format delimited
-    fields terminated by '\t';
+    fields terminated by '\t' location "/spark-hive/insurance/prem_std";
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/cv_src.txt' overwrite into table cv_src;
 
 drop table if exists cv_src;
 create table cv_src(
@@ -246,8 +250,11 @@ create table cv_src(
                        cv_1b       DECIMAL(17, 7) comment '现金价值年末（生存给付后）',
                        cv_2        DECIMAL(17, 7) comment '现金价值年中'
 )comment '现金价值表（到每个保单年度）' row format delimited
-    fields terminated by ',';
+    fields terminated by ',' location "/spark-hive/insurance/cv_src";
 
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/prem_cv_real.txt' overwrite into table prem_cv;
+
+select * from prem_cv;
 drop table if exists prem_cv;
 create table prem_cv
 (
@@ -256,7 +263,10 @@ create table prem_cv
     ppp     smallint comment '缴费期间',
     prem_cv      decimal(15, 7) comment '保单价值准备金毛保险费(Preuim)'
 )comment '保单价值准备金毛保险费表' row format delimited
-    fields terminated by '\t';
+    fields terminated by '\t' location "/spark-hive/insurance/prem_cv";
+
+load data  inpath '/export/data/workspace/insurance_test/5_hive_data/rsv_src.txt' overwrite into table rsv_src;
+
 
 drop table if exists rsv_src;
 create table rsv_src
@@ -308,12 +318,14 @@ create table rsv_src
     rsv1_re       decimal(17, 7) comment '修正责任准备金年末',
     rsv2_re       decimal(17, 7) comment '修正责任准备金年初(未加当年初纯保费）'
 )comment '准备金表（到每个保单年度）' row format delimited
-    fields terminated by ',';
+    fields terminated by ',' location "/spark-hive/insurance/rsv_src";
+
+show tables ;
 
 
 --开启spark-sql客户端，将下面的代码粘贴到spark-sql中运行。
 drop database if exists insurance_app cascade;
-create database insurance_app;
+create database if not exists insurance_app location "/spark-hive/tables/";
 use insurance_app;
 drop table if exists insurance_app.policy_actuary;
 create table insurance_app.policy_actuary
@@ -331,7 +343,7 @@ create table insurance_app.policy_actuary
     rsv2_re     decimal(17, 7) comment '修正责任准备金年初(未加当年初纯保费）',
     rsv1_re     decimal(17) comment '修正责任准备金年末',
     np_         decimal(12) comment '修正纯保费'
-) comment '产品精算数据表' row format delimited fields terminated by '\t';
+) comment '产品精算数据表' row format delimited fields terminated by '\t' location "/spark-hive/insurance/policy_actuary";
 
 drop table if exists policy_result;
 create table policy_result
@@ -362,7 +374,7 @@ create table policy_result
     prem_std       decimal(14, 6) comment '每期交保费',
     prem_thismonth decimal(14, 6) comment '本月应交保费'
 )  comment '客户保单精算结果表' partitioned by (month string)
-    row format delimited fields terminated by '\t';
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/policy_result";
 
 --保费收入增长率
 drop table if exists app_agg_month_incre_rate;
@@ -372,7 +384,7 @@ CREATE TABLE app_agg_month_incre_rate
     last_prem       DECIMAL(24, 6) comment '上月保费收入',
     prem_incre_rate DECIMAL(6, 4)comment '保费收入增长率'
 )comment '保费收入增长率表' partitioned by (month string comment '月份')
-    row format delimited fields terminated by '\t';
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/app_agg_month_incre_rate";
 
 drop TABLE if exists app_agg_month_first_of_total_prem;
 CREATE TABLE app_agg_month_first_of_total_prem
@@ -381,7 +393,7 @@ CREATE TABLE app_agg_month_first_of_total_prem
     total_prem          DECIMAL(24, 6),
     first_of_total_prem DECIMAL(8, 6)
 ) comment '首年保费与保费收入比表' partitioned by (month string comment '月份')
-    row format delimited fields terminated by '\t';
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/app_agg_month_first_of_total_prem";
 
 drop TABLE if exists app_agg_month_premperpol;
 CREATE TABLE app_agg_month_premperpol
@@ -390,7 +402,7 @@ CREATE TABLE app_agg_month_premperpol
     insur_name   string comment '保险名称',
     prem_per_pol DECIMAL(38, 2) comment '个人营销渠道的件均保费'
 ) comment '个人营销渠道的件均保费' partitioned by (month string comment '月份')
-    row format delimited fields terminated by '\t';
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/app_agg_month_premperpol" ;
 
 
 DROP TABLE if exists app_agg_month_mort_dis_rate;
@@ -402,7 +414,7 @@ CREATE TABLE app_agg_month_mort_dis_rate
     sg_rate    decimal(8,6),
     sc_rate    decimal(8,6)
 ) comment '死亡发生率和残疾发生率表' partitioned by (month string comment '月份')
-    row format delimited fields terminated by '\t';
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/app_agg_month_mort_dis_rate";
 
 --新业务价值率
 drop table if exists app_agg_month_nbev;
@@ -412,14 +424,14 @@ create table app_agg_month_nbev
     insur_name string comment '保险名称',
     nbev decimal(38,11) comment '新业务价值率'
 )  comment '新业务价值率表' partitioned by (month string comment '月份')
-    row format delimited fields terminated by '\t';
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/app_agg_month_nbev";
 
 drop table if exists app_agg_month_high_net_rate;
 create table app_agg_month_high_net_rate
 (
     high_net_rate decimal(8, 6) comment '高净值客户比例'
 ) comment '高净值客户比例表' partitioned by (month string comment '月份')
-    row format delimited fields terminated by '\t';
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/app_agg_month_high_net_rate";
 
 
 drop table if exists app_agg_month_dir;
@@ -432,5 +444,5 @@ create table app_agg_month_dir
     sum_sur_ben decimal(27) comment '总生存金',
     sum_rsv2_re decimal(27,2) comment '总准备金'
 ) comment '各地区的汇总保费表' partitioned by (month string comment '月份')
-    row format delimited fields terminated by '\t';
+    row format delimited fields terminated by '\t' location "/spark-hive/insurance/app_agg_month_dir";
 

@@ -46,8 +46,8 @@ if __name__ == '__main__':
     spark = SparkSession.builder.appName("spark_hive") \
         .master("local[*]") \
         .config("spark.sql.shuffle.partitions", 4) \
-        .config("spark.sql.warehouse.dir", "hdfs://192.168.10.131:8020/user/hive/warehouse") \
-        .config("hive.metastore.uris", "thrift://192.168.10.132:9083") \
+        .config("spark.sql.warehouse.dir", "hdfs://192.168.10.133:8020/user/hive/warehouse") \
+        .config("hive.metastore.uris", "thrift://192.168.10.133:9083") \
         .enableHiveSupport() \
         .getOrCreate()
 

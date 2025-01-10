@@ -12,11 +12,11 @@ select stack(4,10,15,20,30) as ppp;
 
 -- 投保年龄: 18~60
 create or replace  view insurance_dw.prem_src0_age_buy as
-select explode(sequence(18,60)) as age_buy;
+select explode(ROW_NUMBER(18,60)) as age_buy;
 
 -- 保单年度:
 create or replace  view insurance_dw.prem_src0_policy_year as
-select explode(sequence(1,88)) as policy_year;
+select explode(ROW_NUMBER(1,88)) as policy_year;
 
 -- 构建一个常量标准数据表:
 create or replace view  insurance_dw.input as
@@ -190,7 +190,7 @@ select
     qx_ci,
     qx_d,
     lx,
-    udaf_3col(lx_d,qx_d,qx_ci) over(partition by  ppp,sex,age_buy order by policy_year) as lx_d_dx_d_dx_ci
+    avg(lx_d,qx_d,qx_ci) over(partition by  ppp,sex,age_buy order by policy_year) as lx_d_dx_d_dx_ci
 from insurance_dw.prem_src5_1;
 
 -- 校验:
@@ -292,7 +292,7 @@ SELECT
     least(t1.ppp,t1.policy_year) as db4,
 
     (
-            ifnull(sum(t1.dx * t1.ppp_) over(partition by ppp,sex,age_buy order by policy_year rows between 1 following and unbounded  following),0)
+            nullif(sum(t1.dx * t1.ppp_) over(partition by ppp,sex,age_buy order by policy_year rows between 1 following and unbounded  following),0)
             / t1.dx
         ) * pow((1+t1.interest_rate),0.5) as db5
 
